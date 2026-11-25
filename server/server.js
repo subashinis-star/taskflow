@@ -34,8 +34,9 @@ app.post("/api/register", async (req, res) => {
     );
 
     res.status(201).json(result.rows[0]);
-  } catch (error) {
-    res.status(400).json({ message: "Registration failed" });
+    } catch (error) {
+    console.error("Registration error:", error.message);
+    res.status(500).json({ message: "Registration failed" });
   }
 });
 
