@@ -1,10 +1,13 @@
-
 import { useEffect, useState } from "react";
 import axios from "axios";
 import "./App.css";
 
+import Header from "./components/Header";
+import AuthForm from "./components/AuthForm";
+import Dashboard from "./components/Dashboard";
 
 const API = "https://taskflow-api-muvn.onrender.com/api";
+
 const getToken = () => localStorage.getItem("token");
 
 function App() {
@@ -17,7 +20,9 @@ function App() {
   const [message, setMessage] = useState("");
 
   const auth = {
-    headers: { Authorization: `Bearer ${getToken()}` }
+    headers: {
+      Authorization: `Bearer ${getToken()}`
+    }
   };
 
   const loadTasks = async () => {
@@ -32,13 +37,17 @@ function App() {
   };
 
   useEffect(() => {
-    if (loggedIn) loadTasks();
+    if (loggedIn) {
+      loadTasks();
+    }
   }, [loggedIn]);
 
   const handleAuth = async (e) => {
     e.preventDefault();
+
     try {
       const route = isRegister ? "register" : "login";
+
       const response = await axios.post(`${API}/${route}`, {
         username,
         password
@@ -53,22 +62,29 @@ function App() {
         setMessage("");
       }
     } catch (error) {
-      setMessage(error.response?.data?.message || "Something went wrong.");
+      setMessage(
+        error.response?.data?.message || "Something went wrong."
+      );
     }
   };
 
   const addTask = async (e) => {
     e.preventDefault();
+
     if (!title.trim()) return;
+
     await axios.post(`${API}/tasks`, { title }, auth);
     setTitle("");
     loadTasks();
   };
 
   const toggleTask = async (task) => {
-    await axios.put(`${API}/tasks/${task.id}`, {
-      completed: !task.completed
-    }, auth);
+    await axios.put(
+      `${API}/tasks/${task.id}`,
+      { completed: !task.completed },
+      auth
+    );
+
     loadTasks();
   };
 
@@ -87,56 +103,33 @@ function App() {
     return (
       <div className="app">
         <div className="container">
-          <h1>TaskFlow</h1>
-          <h2>{isRegister ? "Create Account" : "Login"}</h2>
-          <form onSubmit={handleAuth}>
-            <input placeholder="Username" value={username}
-              onChange={e => setUsername(e.target.value)} required />
-            <input type="password" placeholder="Password (8+ characters)"
-              value={password} onChange={e => setPassword(e.target.value)}
-              required minLength={8} />
-            <button type="submit">
-              {isRegister ? "Register" : "Login"}
-            </button>
-          </form>
-          <button onClick={() => setIsRegister(!isRegister)}>
-            {isRegister ? "Go to Login" : "Create Account"}
-          </button>
-          <p>{message}</p>
+          <Header />
+
+          <AuthForm
+            isRegister={isRegister}
+            username={username}
+            setUsername={setUsername}
+            password={password}
+            setPassword={setPassword}
+            handleAuth={handleAuth}
+            toggleRegister={() => setIsRegister(!isRegister)}
+            message={message}
+          />
         </div>
       </div>
     );
   }
 
   return (
-    <div className="app">
-      <div className="container">
-        <h1>TaskFlow</h1>
-        <p className="subtitle">Organise your day. Achieve more.</p>
-        <button onClick={logout}>Logout</button>
-        <form onSubmit={addTask}>
-          <input value={title} onChange={e => setTitle(e.target.value)}
-            placeholder="Enter a new task..." />
-          <button type="submit">Add Task</button>
-        </form>
-        <h2>My Tasks ({tasks.length})</h2>
-        {tasks.length === 0 && <p>No tasks yet. Add your first task!</p>}
-        {tasks.map(task => (
-          <div className="task" key={task.id}>
-            <span className={task.completed ? "completed" : ""}>
-              {task.title}
-            </span>
-            <div>
-              <button onClick={() => toggleTask(task)}>
-                {task.completed ? "Undo" : "Complete"}
-              </button>
-              <button className="delete"
-                onClick={() => deleteTask(task.id)}>Delete</button>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
+    <Dashboard
+      logout={logout}
+      title={title}
+      setTitle={setTitle}
+      addTask={addTask}
+      tasks={tasks}
+      toggleTask={toggleTask}
+      deleteTask={deleteTask}
+    />
   );
 }
 
