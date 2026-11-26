@@ -2,15 +2,18 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import "./App.css";
 
-import Header from "./components/Header";
-import AuthForm from "./components/AuthForm";
+import LoginImage from "./components/LoginImage";
+import LoginPanel from "./components/LoginPanel";
 import Dashboard from "./components/Dashboard";
-
 const API = "https://taskflow-api-muvn.onrender.com/api";
 
 const getToken = () => localStorage.getItem("token");
 
 function App() {
+  const toggleRegister = () => {
+  setIsRegister((previous) => !previous);
+  setMessage("");
+};
   const [tasks, setTasks] = useState([]);
   const [title, setTitle] = useState("");
   const [username, setUsername] = useState("");
@@ -100,25 +103,25 @@ function App() {
   };
 
   if (!loggedIn) {
-    return (
-      <div className="app">
-        <div className="container">
-          <Header />
+  return (
+    <main className="auth-page">
+      <div className="auth-layout">
+        <LoginImage />
 
-          <AuthForm
-            isRegister={isRegister}
-            username={username}
-            setUsername={setUsername}
-            password={password}
-            setPassword={setPassword}
-            handleAuth={handleAuth}
-            toggleRegister={() => setIsRegister(!isRegister)}
-            message={message}
-          />
-        </div>
+        <LoginPanel
+          isRegister={isRegister}
+          username={username}
+          setUsername={setUsername}
+          password={password}
+          setPassword={setPassword}
+          handleAuth={handleAuth}
+          toggleRegister={toggleRegister}
+          message={message}
+        />
       </div>
-    );
-  }
+    </main>
+  );
+}
 
   return (
     <Dashboard
